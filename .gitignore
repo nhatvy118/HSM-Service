@@ -1,0 +1,21 @@
+# Secrets
+.env
+.env.local
+
+# Local tokens / HSM state
+tokens/
+*.pem
+*.key
+
+# Build artifacts
+*.so
+internal/server
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db

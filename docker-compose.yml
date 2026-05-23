@@ -1,0 +1,43 @@
+services:
+  softhsm:
+    build:
+      context: deployment/softhsm
+    image: softhsm2:local
+    container_name: softhsm
+    restart: unless-stopped
+    environment:
+      TOKEN_LABEL: ${TOKEN_LABEL:-dev-ecdsa}
+      USER_PIN: ${USER_PIN:?set USER_PIN in .env}
+      SO_PIN: ${SO_PIN:?set SO_PIN in .env}
+    volumes:
+      - softhsm-tokens:/var/lib/softhsm/tokens
+    healthcheck:
+      test: ["CMD", "softhsm2-util", "--show-slots"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  hsm-server:
+    build:
+      context: ./internal
+      dockerfile: ../deployment/server/Dockerfile
+    image: hsm-server:local
+    container_name: hsm-server
+    restart: unless-stopped
+    depends_on:
+      softhsm:
+        condition: service_healthy
+    environment:
+      PKCS11_MODULE_PATH: /usr/lib/softhsm/libsofthsm2.so
+      HSM_TOKEN: ${TOKEN_LABEL:-dev-ecdsa}
+      HSM_USER_PIN: ${USER_PIN:?set USER_PIN in .env}
+      API_KEY: ${API_KEY:?set API_KEY in .env}
+      PORT: 8080
+    ports:
+      - "8080:8080"
+    volumes:
+      - softhsm-tokens:/var/lib/softhsm/tokens
+
+volumes:
+  softhsm-tokens:
+    driver: local
