@@ -32,9 +32,9 @@ services:
       HSM_TOKEN: ${TOKEN_LABEL:-dev-ecdsa}
       HSM_USER_PIN: ${USER_PIN:?set USER_PIN in .env}
       API_KEY: ${API_KEY:?set API_KEY in .env}
-      PORT: 8080
+      PORT: ${HSM_PORT:-8080}
     ports:
-      - "8080:8080"
+      - "${HSM_PORT:-8080}:${HSM_PORT:-8080}"
     volumes:
       - softhsm-tokens:/var/lib/softhsm/tokens
 
